@@ -4,10 +4,10 @@ import state from 'callbag-state';
 import subscribe from 'callbag-subscribe';
 import pipe from 'callbag-pipe';
 
-import { makeKeyed } from '../src/keyed';
+import { keyed } from '../src';
 
 const s = state([1, 2]);
-const k = makeKeyed(s, n => n);
+const k = keyed(s, n => n);
 
 pipe(
   k.index(2),

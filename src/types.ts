@@ -1,3 +1,5 @@
+export type HasList<T> = {[k: string]: Array<T>} & {[k: number]: Array<T>};
+
 export type KeyFunc<T> = (t: T) => number | string;
 
 export type KeyMap<T> = {[key: string]: { index: number; item: T }};

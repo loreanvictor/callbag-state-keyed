@@ -1,14 +1,10 @@
 import { Sink } from 'callbag';
 import {
-  State, SubState, broadcast,
-  MsgType, _Start, _Data, _End,
-  isLeaf, Change, ChangeTrace, trace
+  State, SubState, broadcast, MsgType, _Start, _Data, _End, isLeaf, Change, ChangeTrace, trace
 } from 'callbag-state';
-import { KeyFunc, ListChanges } from './types';
+import { HasList, KeyFunc, ListChanges } from './types';
 import { Watcher } from './watcher';
 
-
-type HasList<T> = {[k: string]: Array<T>} & {[k: number]: Array<T>};
 
 export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
   state: State<T[]> | SubState<U, K>,
