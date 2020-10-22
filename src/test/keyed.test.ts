@@ -48,6 +48,7 @@ describe('keyed', () => {
     const k = keyed(s, n => n);
 
     expect(k.get()).to.eql([1, 2, 3, 4, 5]);
+    subscribe(() => {})(k);
     s.set([5, 4, 3, 2, 1]);
     subscribe(v => {
       expect(v).to.eql([5, 4, 3, 2, 1]);
@@ -55,11 +56,11 @@ describe('keyed', () => {
     })(k);
   });
 
-  it('should track the most recent value if proxy-state is root.', () => {
+  it('should track the most recent value if proxy-state is root and subscribed to.', () => {
     const s = state([1, 2, 3, 4]);
     const k = keyed(s, n => n);
     s.set([4, 3, 2, 1]);
-    k.get().should.eql([4, 3, 2, 1]);
+    k.get().should.eql([1, 2, 3, 4]); // --> not subscribed
     subscribe(() => {})(k);
     s.set([4, 1, 2, 3]);
     k.get().should.eql([4, 1, 2, 3]);
@@ -114,6 +115,44 @@ describe('keyed', () => {
     })(s);
 
     k(2, err);
+  });
+
+  it('should terminate when no sinks remain.', done => {
+    const s = makeState([], (t: any, d: any) => {
+      if (t === 0) {
+        d(0, (_t: any) => {
+          if (_t === 2) { done(); }
+        });
+      }
+    }, () => {});
+
+    const k = keyed(s, x => x);
+    const s1 = subscribe(() => {})(k);
+    const s2 = subscribe(() => {})(k);
+    s1(); s2();
+  });
+
+  it('should re-connect and re-terminate when sinks come and go.', () => {
+    let cc = 0; let tc = 0;
+    const s = makeState([], (t: any, d: any) => {
+      if (t === 0) {
+        cc++;
+        d(0, (_t: any) => {
+          if (_t === 2) { tc++; }
+        });
+      }
+    }, () => {});
+
+    const k = keyed(s, x => x);
+    const s1 = subscribe(() => {})(k);
+    const s2 = subscribe(() => {})(k);
+    cc.should.equal(1); tc.should.equal(0);
+    s1(); s2();
+    cc.should.equal(1); tc.should.equal(1);
+    const s3 = subscribe(() => {})(k);
+    cc.should.equal(2); tc.should.equal(1);
+    s3();
+    cc.should.equal(2); tc.should.equal(2);
   });
 
   describe('.key()', () => {
@@ -176,7 +215,7 @@ describe('keyed', () => {
 
     it('should return proper initial value for removed keys.', done => {
       const s = state([43, 42]);
-      const k = keyed(s, n => n);
+      const k = keyed(s, n => n); subscribe(() => {})(k);
       k.set([43]);
       subscribe(v => {
         expect(v).to.be.undefined;
@@ -322,6 +361,16 @@ describe('keyed', () => {
       s.set([43, 44, 42]);
       s.set([44, 43, 42]);
       r.should.eql([0, 2]);
+    });
+
+    it('should be terminated when source clears out.', done => {
+      const s = state([]);
+      const k = keyed(s, x => x);
+      subscribe({
+        complete: () => done()
+      })(k.index(42));
+
+      s.clear();
     });
   });
 

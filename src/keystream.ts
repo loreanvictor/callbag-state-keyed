@@ -11,7 +11,7 @@ export function keyDownstream<T>(
   current: () => T | undefined,
 ):  Downstream<T> {
   return ((start: START, sink: Sink<Change<T>>) => {
-    if (start !== _Start) { return; }
+    /*istanbul ignore if*/if (start !== _Start) { return; }
     src(_Start, (t: MsgType, m?: any) => {
       if (t === _Data) {
         const change = m[0] as Change<T[]>;
@@ -56,7 +56,7 @@ export function keyUpstream<T>(
           }
         }
       });
-    } else if (type === _End && m) {
+    } else/*istanbul ignore else*/if (type === _End && m) {
       src(_End, m);
     }
   };

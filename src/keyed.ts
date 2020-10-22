@@ -26,40 +26,8 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
     }
   };
 
-  state.downstream()(_Start, (t: MsgType, _m?: any) => {
-    if (t === _Start) { talkback = _m; }
-    else if (t === _Data) {
-      let change = _m as Change<T[]>;
-      const listChanges = watcher.changes(change.value);
-
-      // retrace moved elements
-      if (listChanges.moves.length > 0 && !isLeaf(change.trace)) {
-        const mapping = listChanges.moves.reduce((total, move) => {
-          total[move.oldIndex] = move.newIndex;
-          return total;
-        }, <{[src: number]: number}>{});
-        const _tr: ChangeTrace<T[]> = {subs:  { ... change.trace.subs } };
-        Object.entries(mapping).forEach(([src, dest]) => {
-          const subtrace = trace(value[src as any], change.value!![dest]);
-          if (subtrace) {
-            (_tr.subs as any)[dest] = subtrace;
-          }
-          else {
-            delete (_tr.subs as any)[dest];
-          }
-        });
-        change = {
-          value: change.value,
-          trace: _tr
-        };
-      }
-
-      value = change.value || [];
-      broadcast(_Data, [change, listChanges], sinks);
-    } else if (t === _End) { terminate(_m); }
-  });
-
   const _changes: KeyedChangeStream<T> = (type: MsgType, m?: any) => {
+    /* istanbul ignore else */
     if (type === _Start) {
       const sink = m as Sink<[Change<T[]>, ListChanges<T>]>;
       sinks.push(sink);
@@ -67,9 +35,47 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
       sink(_Start, (t: MsgType) => {
         if (t === _End) {
           const index = sinks.indexOf(sink);
+
+          /*istanbul ignore else*/
           if (index >= 0) { sinks.splice(index, 1); }
+          if (sinks.length === 0) { terminate(); }
         }
       });
+
+      if (sinks.length === 1) {
+        state.downstream()(_Start, (t: MsgType, _m?: any) => {
+          if (t === _Start) { talkback = _m; }
+          else if (t === _Data) {
+            let change = _m as Change<T[]>;
+            const listChanges = watcher.changes(change.value);
+
+            // retrace moved elements
+            if (listChanges.moves.length > 0 && !isLeaf(change.trace)) {
+              const mapping = listChanges.moves.reduce((total, move) => {
+                total[move.oldIndex] = move.newIndex;
+                return total;
+              }, <{[src: number]: number}>{});
+              const _tr: ChangeTrace<T[]> = {subs:  { ... change.trace.subs } };
+              Object.entries(mapping).forEach(([src, dest]) => {
+                const subtrace = trace(value[src as any], change.value!![dest]);
+                if (subtrace) {
+                  (_tr.subs as any)[dest] = subtrace;
+                }
+                else {
+                  delete (_tr.subs as any)[dest];
+                }
+              });
+              change = {
+                value: change.value,
+                trace: _tr
+              };
+            }
+
+            value = change.value || [];
+            broadcast(_Data, [change, listChanges], sinks);
+          } else/*istanbul ignore else*/if (t === _End) { terminate(_m); }
+        });
+      }
     }
   };
 
@@ -79,18 +85,18 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
       _changes(_Start, (t: MsgType, _m?: any) => {
         if (t === _Start) { sink(_Start, _m); sink(_Data, value); }
         else if (t === _Data) { sink(_Data, _m[0].value || []); }
-        else if (t === _End) { sink(_End, _m); }
+        else/*istanbul ignore else*/if (t === _End) { sink(_End, _m); }
       });
     } else if (type === _Data) {
       state.upstream()(_Data, { value: m, trace: { from: value as any, to: m }});
-    } else if (type === _End) {
+    } else/*istanbul ignore else*/if (type === _End) {
       terminate(m);
       state.upstream()(type, m);
     }
   };
 
   const _index = (key: number | string) => (type: MsgType, m?: any) => {
-    if (type !== _Start) { return; }
+    /*istanbul ignore if*/if (type !== _Start) { return; }
     const sink = m as Sink<number>;
     let last: number | undefined = watcher.keymap[key]?.index;
     _changes(_Start, (t: MsgType, _m?: any) => {
@@ -102,7 +108,7 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
           last = index;
         }
       }
-      else if (t === _End) { sink(_End, _m); }
+      else/*istanbul ignore else*/if (t === _End) { sink(_End, _m); }
     });
   };
 
@@ -112,7 +118,7 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
   _state.index = _index;
 
   _state.changes = () => (type: MsgType, m?: any) => {
-    if (type !== _Start) { return; }
+    /*istanbul ignore if*/if (type !== _Start) { return; }
     const sink = m as Sink<ListChanges<T>>;
     _changes(_Start, (t: MsgType, _m?: any) => {
       if (t === _Data) { sink(_Data, _m[1]); }

@@ -1,6 +1,6 @@
 {
   "name": "callbag-state-keyed",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "keyed callbag states",
   "main": "dist/es5/index.js",
   "module": "dist/es6/index.js",
@@ -84,6 +84,6 @@
     ]
   },
   "dependencies": {
-    "callbag-state": "^0.1.5"
+    "callbag-state": "^0.1.8"
   }
 }
