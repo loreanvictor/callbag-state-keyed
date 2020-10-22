@@ -95,7 +95,12 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
     }
   };
 
-  const _index = (key: number | string) => (type: MsgType, m?: any) => {
+  _state.get = () => value;
+  _state.set = (t: T[]) => _state(_Data, t);
+  _state.clear = () => _state(_End);
+  _state.keyfunc = keyfunc;
+
+  _state.index = (key: number | string) => (type: MsgType, m?: any) => {
     /*istanbul ignore if*/if (type !== _Start) { return; }
     const sink = m as Sink<number>;
     let last: number | undefined = watcher.keymap[key]?.index;
@@ -111,11 +116,6 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
       else/*istanbul ignore else*/if (t === _End) { sink(_End, _m); }
     });
   };
-
-  _state.get = () => value;
-  _state.set = (t: T[]) => _state(_Data, t);
-  _state.clear = () => _state(_End);
-  _state.index = _index;
 
   _state.changes = () => (type: MsgType, m?: any) => {
     /*istanbul ignore if*/if (type !== _Start) { return; }

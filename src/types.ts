@@ -1,5 +1,5 @@
 import { Sink, Source } from 'callbag';
-import { Change, SubState } from 'callbag-state';
+import { Change, State, SubState } from 'callbag-state';
 
 export type HasList<T> = {[k: string]: Array<T>} & {[k: number]: Array<T>};
 
@@ -38,5 +38,17 @@ export type KeyedState<T> = Source<T[]> & Sink<T[]> & {
   changes(): Source<ListChanges<T>>;
   index(k: string | number): Source<number>;
   key(k: string | number): SubState<T[], number>;
+  keyfunc: (t: T) => string | number;
 };
 
+
+export function isKeyedState<T>(cb: Source<T[]>): cb is KeyedState<T> {
+  return cb && typeof cb === 'function' && cb.length === 2
+    && (cb as any).get && typeof (cb as any).get === 'function' && (cb as any).get.length === 0
+    && (cb as any).set && typeof (cb as any).set === 'function' && (cb as any).set.length === 1
+    && (cb as any).clear && typeof (cb as any).clear === 'function' && (cb as any).clear.length === 0
+    && (cb as any).index && typeof (cb as any).index === 'function' && (cb as any).index.length === 1
+    && (cb as any).changes && typeof (cb as any).changes === 'function' && (cb as any).changes.length === 1
+    && (cb as any).keyfunc && typeof (cb as any).keyfunc === 'function' && (cb as any).keyfunc.length === 1
+    ;
+}
