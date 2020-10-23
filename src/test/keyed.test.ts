@@ -7,7 +7,7 @@ import { should, expect } from 'chai'; should();
 const makeSubject = require('callbag-subject');
 import subscribe from 'callbag-subscribe';
 import pipe from 'callbag-pipe';
-import { state, makeState, Change } from 'callbag-state';
+import { state, makeState } from 'callbag-state';
 
 import { keyed } from '../index';
 import { ListChanges } from '../types';
@@ -70,7 +70,7 @@ describe('keyed', () => {
     const r: number[][] = [];
     const s = state([1, 2, 3, 4]);
     const k = keyed(s, n => n);
-    subscribe(v => r.push(v as any))(k);
+    pipe(k, subscribe(v => r.push(v)));
 
     s.set([4, 3, 2, 1]);
     k.set([1, 4, 2, 3]);
@@ -81,7 +81,7 @@ describe('keyed', () => {
     const r: number[][] = [];
     const s = state([1, 2, 3, 4]);
     const k = keyed(s, n => n);
-    subscribe(v => r.push(v as any))(s);
+    pipe(s, subscribe(v => r.push(v)));
 
     s.set([4, 3, 2, 1]);
     k.set([1, 4, 2, 3]);
@@ -162,7 +162,7 @@ describe('keyed', () => {
       const s = state([{id: 101, name: 'John'}, {id: 102, name: 'Jill'}]);
       const k = keyed(s, p => p.id);
 
-      subscribe(n => r.push(n as any))(k.key(102).sub('name'));
+      pipe(k.key(102).sub('name'), subscribe(n => r.push(n!!)));
 
       r.length.should.equal(1);
       s.set([s.get()[1], s.get()[0]]);
@@ -181,8 +181,8 @@ describe('keyed', () => {
       });
       const k = keyed(s.sub('people'), p => p.id);
 
-      subscribe(v => r.push(v))(k.key(101));
-      subscribe(v => r2.push(v))(k.key(102));
+      pipe(k.key(101), subscribe(v => r.push(v)));
+      pipe(k.key(102), subscribe(v => r2.push(v)));
 
 
       s.set({
@@ -228,7 +228,7 @@ describe('keyed', () => {
       const s = state<[number, string][]>([[1, 'A'], [2, 'B'], [3, 'C'], [4, 'D']]);
       const k = keyed(s, n => n[0]);
 
-      subscribe(c => r.push(c as any))(k.key(2).sub(1));
+      pipe(k.key(2).sub(1), subscribe(c => r.push(c!!)));
       k.key(2).set([2, 'X']);
       k.set([[2, 'Z'], [3, 'D']]);
 
@@ -240,7 +240,7 @@ describe('keyed', () => {
       const s = state<[number, string][]>([[1, 'A'], [2, 'B'], [3, 'C'], [4, 'D']]);
       const k = keyed(s, n => n[0]);
 
-      subscribe(c => r.push(c as any))(s.sub(1).sub(1));
+      pipe(s.sub(1).sub(1), subscribe(c => r.push(c!!)));
       k.key(2).sub(1).set('X');
       k.key(2).set([2, 'H']);
 
@@ -252,7 +252,7 @@ describe('keyed', () => {
       const s = state<[number, string][]>([[1, 'A'], [2, 'B'], [3, 'C'], [4, 'D']]);
       const k = keyed(s, n => n[0]);
 
-      subscribe(c => r.push(c as any))(k.key(2).sub(1));
+      pipe(k.key(2).sub(1), subscribe(c => r.push(c!!)));
       s.sub(1).set([2, 'X']);
       s.set([[2, 'X'], [3, 'Y']]);
       s.sub(0).sub(1).set('W');
@@ -266,7 +266,7 @@ describe('keyed', () => {
       const k = keyed(s, n => n[0]);
       const k2 = keyed(s, n => n[0]);
 
-      subscribe(c => r.push(c as any))(k.key(2).sub(1));
+      pipe(k.key(2).sub(1), subscribe(c => r.push(c!!)));
       k2.key(2).set([2, 'X']);
       k2.key(2).sub(1).set('Z');
       k2.set([[2, 'W']]);
@@ -329,7 +329,7 @@ describe('keyed', () => {
       const r: number[] = [];
       const s = state([42, 43]);
       const k = keyed(s, n => n);
-      subscribe(i => r.push(i as any))(k.index(42));
+      pipe(k.index(42), subscribe(i => r.push(i)));
       s.set([43, 42]);
       r.should.eql([0, 1]);
     });
@@ -338,7 +338,7 @@ describe('keyed', () => {
       const r: any[] = [];
       const s = state([42, 43]);
       const k = keyed(s, n => n);
-      subscribe(i => r.push(i))(k.index(42));
+      pipe(k.index(42), subscribe(i => r.push(i)));
       s.set([43]);
       r.should.eql([0, undefined]);
     });
@@ -379,7 +379,7 @@ describe('keyed', () => {
       const r: ListChanges<number>[] = [];
       const s = state([1, 2, 3]);
       const k = keyed(s, n => n);
-      subscribe(c => r.push(c as any))(k.changes());
+      pipe(k.changes(), subscribe(c => r.push(c)));
       s.set([1, 3, 2]);
       s.set([1, 3, 2, 4]);
       s.set([1, 5, 3, 2, 4]);

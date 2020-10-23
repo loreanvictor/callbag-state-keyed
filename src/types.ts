@@ -1,5 +1,5 @@
-import { Sink, Source } from 'callbag';
-import { Change, State, SubState } from 'callbag-state';
+import { Callbag, Source } from 'callbag';
+import { Change, SubState } from 'callbag-state';
 
 export type HasList<T> = {[k: string]: Array<T>} & {[k: number]: Array<T>};
 
@@ -31,7 +31,7 @@ export type ListChanges<T> = {
 
 export type KeyedChangeStream<T> = Source<[Change<T[]>, ListChanges<T>]>;
 
-export type KeyedState<T> = Source<T[]> & Sink<T[]> & {
+export type KeyedState<T> = Callbag<T[], T[]> & {
   get(): T[];
   set(t: T[]): void;
   clear(): void;
