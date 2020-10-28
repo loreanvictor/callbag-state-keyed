@@ -400,6 +400,17 @@ describe('keyed', () => {
 
       r.should.eql([1, undefined]);
     });
+
+    describe('.get()', () => {
+      it('should return the last index tracked.', () => {
+        const k = keyed(state(['a', 'b', 'c']), x => x);
+        const i = k.index('b');
+        i.get()!!.should.equal(1);
+        pipe(i, subscribe(() => {}));
+        k.set(['c', 'a', 'b']);
+        i.get()!!.should.equal(2);
+      });
+    });
   });
 
   describe('.changes()', () => {

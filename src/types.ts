@@ -36,12 +36,13 @@ export type KeyedState<T> = Callbag<T[], T[]> & {
   set(t: T[]): void;
   clear(): void;
   changes(): Source<ListChanges<T>>;
-  index(k: string | number): Source<number>;
+  index(k: string | number): Source<number> & { get(): number | undefined };
   key(k: string | number): SubState<T[], number>;
   keyfunc: (t: T) => string | number;
 };
 
 
+/* istanbul ignore next */
 export function isKeyedState<T>(cb: Source<T[]>): cb is KeyedState<T> {
   return cb && typeof cb === 'function' && cb.length === 2
     && (cb as any).get && typeof (cb as any).get === 'function' && (cb as any).get.length === 0

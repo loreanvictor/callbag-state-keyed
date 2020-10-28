@@ -103,21 +103,26 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
   _state.clear = () => _state(_End);
   _state.keyfunc = keyfunc;
 
-  _state.index = (key: number | string) => (type: MsgType, m?: any) => {
-    /*istanbul ignore if*/if (type !== _Start) { return; }
-    const sink = m as Sink<number>;
+  _state.index = (key: number | string) => {
     let last: number | undefined = watcher.keymap[key]?.index;
-    _changes(_Start, (t: MsgType, _m?: any) => {
-      if (t === _Start) { sink(_Start, _m); sink(_Data, watcher.keymap[key]?.index); }
-      else if (t === _Data) {
-        const index = watcher.keymap[key]?.index;
-        if (index !== last) {
-          sink(_Data, index);
-          last = index;
+    const src = (type: MsgType, m?: any) => {
+      /*istanbul ignore if*/if (type !== _Start) { return; }
+      const sink = m as Sink<number>;
+      _changes(_Start, (t: MsgType, _m?: any) => {
+        if (t === _Start) { sink(_Start, _m); sink(_Data, watcher.keymap[key]?.index); }
+        else if (t === _Data) {
+          const index = watcher.keymap[key]?.index;
+          if (index !== last) {
+            sink(_Data, index);
+            last = index;
+          }
         }
-      }
-      else/*istanbul ignore else*/if (t === _End) { sink(_End, _m); }
-    });
+        else/*istanbul ignore else*/if (t === _End) { sink(_End, _m); }
+      });
+    };
+
+    src.get = () => last;
+    return src;
   };
 
   _state.changes = () => (type: MsgType, m?: any) => {
