@@ -322,6 +322,20 @@ describe('keyed', () => {
       })(k);
       k.key(1)(2, err);
     });
+
+    it('should properly handle removal of key with in-place mutations.', () => {
+      const r: any[] = [];
+      const s = state(['A', 'B', 'C']);
+      const k = keyed(s, x => x);
+      pipe(
+        k.key('B'), subscribe(v => r.push(v))
+      );
+
+      s.get().splice(1, 1);
+      s.set(s.get());
+
+      r.should.eql(['B', undefined]);
+    });
   });
 
   describe('.index()', () => {
@@ -371,6 +385,20 @@ describe('keyed', () => {
       })(k.index(42));
 
       s.clear();
+    });
+
+    it('should properly handle removal of key with in-place mutations.', () => {
+      const r: any[] = [];
+      const s = state(['A', 'B', 'C']);
+      const k = keyed(s, x => x);
+      pipe(
+        k.index('B'), subscribe(v => r.push(v))
+      );
+
+      s.get().splice(1, 1);
+      s.set(s.get());
+
+      r.should.eql([1, undefined]);
     });
   });
 

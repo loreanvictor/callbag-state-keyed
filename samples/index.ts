@@ -12,10 +12,9 @@ const k = keyed(s, n => n);
 
 pipe(
   k.key(2),
-  map(x => x!! * 2),
+  // map(x => x!! * 2),
   subscribe(console.log)
 );
 
-s.set([2, 1]);
-s.set([1, 3, 2]);
-s.set([1, 3]);
+s.get().splice(1, 1);
+s.set(s.get());

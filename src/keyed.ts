@@ -31,6 +31,9 @@ export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
     if (type === _Start) {
       const sink = m as Sink<[Change<T[]>, ListChanges<T>]>;
       sinks.push(sink);
+      // TODO: we can perhaps keep track of keyed sinks (sinks listening for a particular key)
+      //       more efficiently, so changes are broadcast to them properly by accessing them via
+      //       a hash table. this helps performance of cases with large fan-out (like big arrays).
 
       sink(_Start, (t: MsgType) => {
         if (t === _End) {

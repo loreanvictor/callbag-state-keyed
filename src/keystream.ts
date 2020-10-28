@@ -17,7 +17,7 @@ export function keyDownstream<T>(
         const change = m[0] as Change<T[]>;
         const entry = watcher.keymap[key];
 
-        if ((isLeaf(change.trace) && current() !== entry.item)
+        if ((isLeaf(change.trace) && current() !== entry?.item)
           || (!isLeaf(change.trace) && (
                 (!entry && !!current()) ||
                 (entry && entry.index in change.trace.subs)
