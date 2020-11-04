@@ -1,5 +1,6 @@
 import { Callbag, Source } from 'callbag';
-import { Change, SubState } from 'callbag-state';
+import { Change, MsgType, State, SubState } from 'callbag-state';
+import { Watcher } from './watcher';
 
 export type HasList<T> = {[k: string]: Array<T>} & {[k: number]: Array<T>};
 
@@ -31,14 +32,19 @@ export type ListChanges<T> = {
 
 export type KeyedChangeStream<T> = Source<[Change<T[]>, ListChanges<T>]>;
 
+export type KeyedStateMsgType = MsgType | typeof _Latest | typeof _KeyChangeStream | typeof _Watcher;
+
 export type KeyedState<T> = Callbag<T[], T[]> & {
   get(): T[];
   set(t: T[]): void;
   clear(): void;
+  keyfunc: (t: T) => string | number;
+  state: State<T[]>;
+  changestream: KeyedChangeStream<T>;
+  watcher: Watcher<T>;
   changes(): Source<ListChanges<T>>;
   index(k: string | number): Source<number> & { get(): number | undefined };
   key(k: string | number): SubState<T[], number>;
-  keyfunc: (t: T) => string | number;
 };
 
 
@@ -53,3 +59,7 @@ export function isKeyedState<T>(cb: Source<T[]>): cb is KeyedState<T> {
     && (cb as any).keyfunc && typeof (cb as any).keyfunc === 'function' && (cb as any).keyfunc.length === 1
     ;
 }
+
+export const _Latest = 100;
+export const _KeyChangeStream = 201;
+export const _Watcher = 202;

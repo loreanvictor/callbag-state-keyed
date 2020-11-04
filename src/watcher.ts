@@ -16,16 +16,22 @@ export class Watcher<T> {
       moves: [],
     };
 
-    const keymap = list.reduce((map, item, index) => {
+    const keymap: KeyMap<T> = {};
+    for (let index = 0, item = list[index]; index < list.length; item = list[++index]) {
       const _key = this.keyFunc(item);
-      map[_key] = { index, item };
+      keymap[_key] = { index, item };
+
       if (!(_key in this._keymap)) {
         changes.additions.push({ index, item });
       }
-      return map;
-    }, <KeyMap<T>>{});
+    }
 
-    Object.entries(this._keymap).forEach(([_key, entry]) => {
+    for (
+      let entries = Object.entries(this._keymap), i = 0, _e = entries[i];
+      i < entries.length;
+      _e = entries[++i]
+    ) {
+      const [_key, entry] = _e;
       if (!(_key in keymap)) {
         changes.deletions.push(entry);
       } else {
@@ -38,7 +44,7 @@ export class Watcher<T> {
           });
         }
       }
-    });
+    }
 
     this._keymap = keymap;
 

@@ -4,6 +4,33 @@ import { KeyedChangeStream } from './types';
 import { Watcher } from './watcher';
 
 
+function _keyDownSinkWrap<T>(
+  key: string | number,
+  sink: Sink<Change<T>>,
+  watcher: Watcher<T>,
+  current: () => T | undefined,
+  t: MsgType, m?: any,
+) {
+  if (t === _Data) {
+    const change = m[0] as Change<T[]>;
+    const entry = watcher.keymap[key];
+
+    if ((isLeaf(change.trace) && current() !== entry?.item)
+      || (!isLeaf(change.trace) && (
+            (!entry && !!current()) ||
+            (entry && entry.index in change.trace.subs)
+      ))
+    ) {
+      sink(_Data, {
+        value: entry?.item,
+        trace: isLeaf(change.trace) || !entry ?
+                undefined :
+                ((change.trace as ChangeTraceNode<T>).subs as any)[entry.index]
+      });
+    }
+  } else { sink(t as any, m); }
+}
+
 export function keyDownstream<T>(
   src: KeyedChangeStream<T>,
   key: string | number,
@@ -12,26 +39,7 @@ export function keyDownstream<T>(
 ):  Downstream<T> {
   return ((start: START, sink: Sink<Change<T>>) => {
     /*istanbul ignore if*/if (start !== _Start) { return; }
-    src(_Start, (t: MsgType, m?: any) => {
-      if (t === _Data) {
-        const change = m[0] as Change<T[]>;
-        const entry = watcher.keymap[key];
-
-        if ((isLeaf(change.trace) && current() !== entry?.item)
-          || (!isLeaf(change.trace) && (
-                (!entry && !!current()) ||
-                (entry && entry.index in change.trace.subs)
-          ))
-        ) {
-          sink(_Data, {
-            value: entry?.item,
-            trace: isLeaf(change.trace) || !entry ?
-                    undefined :
-                    ((change.trace as ChangeTraceNode<T>).subs as any)[entry.index]
-          });
-        }
-      } else { sink(t as any, m); }
-    });
+    src(_Start, _keyDownSinkWrap.bind(null, key, sink, watcher, current));
   }) as any;
 }
 
