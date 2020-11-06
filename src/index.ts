@@ -17,3 +17,4 @@ export function keyed<T, U extends HasList<T>, K extends keyof U>(
 
 
 export default keyed;
+export { Watcher } from './watcher';
