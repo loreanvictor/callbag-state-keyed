@@ -48,16 +48,17 @@ export function keyUpstream<T>(
   src: Upstream<T[]>,
   key: string | number,
   watcher: Watcher<T>,
-  ref: T[],
+  ref: () => T[],
 ): Upstream<T> {
   return (type: MsgType, m?: any) => {
     if (type === _Data) {
       const change = m as Change<T>;
       const entry = watcher.keymap[key];
-      ref[entry.index] = change.value!!;
+      const _ref = ref();
+      _ref[entry.index] = change.value!!;
 
       src(_Data, {
-        value: ref,
+        value: _ref,
         trace: {
           subs: {
             [entry.index]: change.trace

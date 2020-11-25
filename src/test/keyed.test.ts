@@ -336,6 +336,16 @@ describe('keyed', () => {
 
       r.should.eql(['B', undefined]);
     });
+
+    it('should not break change history of parent when changed.', () => {
+      const k = keyed(state([{i: 'a', v: 1}, {i: 'b', v: 1}]), n => n.i);
+      const i = k.key('a');
+      subscribe(() => {})(k);
+
+      k.set([{i: 'a', v: 2}, {i: 'b', v: 2}]);
+      i.set({i: 'a', v: 3});
+      k.get().should.eql([{i: 'a', v: 3}, {i: 'b', v: 2}]);
+    });
   });
 
   describe('.index()', () => {

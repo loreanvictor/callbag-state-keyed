@@ -72,7 +72,7 @@ function key<T>(this: KeyedState<T>, k: string | number) {
   const _sub: SubState<T[], number> = makeState(
     this.watcher.keymap[k]?.item,
     keyDownstream(this.changestream, k, this.watcher, () => _sub.get()),
-    keyUpstream(this.state.upstream() as any, k, this.watcher, this.get()),
+    keyUpstream(this.state.upstream() as any, k, this.watcher, () => this.get()),
   );
 
   return _sub;
