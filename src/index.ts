@@ -1,6 +1,6 @@
-import { State, SubState } from 'callbag-state';
+import { StateLike } from 'callbag-state';
 import { makeKeyed } from './keyed';
-import { HasList, KeyFunc } from './types';
+import { KeyFunc } from './types';
 
 export {
   Addition, Deletion, Move, ListChanges,
@@ -8,8 +8,8 @@ export {
   KeyedState, isKeyedState,
 } from './types';
 
-export function keyed<T, U extends HasList<T>, K extends keyof U>(
-  state: State<T[]> | SubState<U, K>,
+export function keyed<T>(
+  state: StateLike<T[]>,
   keyfunc: KeyFunc<T>,
 ) {
   return makeKeyed(state, keyfunc);

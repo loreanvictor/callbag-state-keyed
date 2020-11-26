@@ -1,10 +1,10 @@
 import { Sink } from 'callbag';
 import {
-  State, SubState, broadcast, MsgType, _Start, _Data, _End, isLeaf, Change, ChangeTrace, trace, makeState
+  State, SubState, broadcast, MsgType, _Start, _Data, _End, isLeaf, Change, ChangeTrace, trace, makeState, StateLike
 } from 'callbag-state';
 import { keyDownstream, keyUpstream } from './keystream';
 import {
-  HasList, KeyedChangeStream, KeyedState, KeyedStateMsgType,
+  KeyedChangeStream, KeyedState, KeyedStateMsgType,
   KeyFunc, ListChanges, _KeyChangeStream, _Latest, _Watcher
 } from './types';
 import { Watcher } from './watcher';
@@ -79,16 +79,16 @@ function key<T>(this: KeyedState<T>, k: string | number) {
 }
 
 
-interface Profile<T, U extends HasList<T>, K extends keyof U> {
-  state: State<T[]> | SubState<U, K>;
+interface Profile<T> {
+  state: StateLike<T[]>;
   sinks: Sink<[Change<T[]>, ListChanges<T>]>[];
   talkback: any;
   value: T[];
   watcher: Watcher<T>;
 }
 
-function _changes<T, U extends HasList<T>, K extends keyof U>(
-  this: Profile<T, U, K>, type: MsgType, m?: any
+function _changes<T>(
+  this: Profile<T>, type: MsgType, m?: any
 ) {
   /* istanbul ignore else */
   if (type === _Start) {
@@ -149,8 +149,8 @@ function _changes<T, U extends HasList<T>, K extends keyof U>(
 }
 
 
-function _state<T, U extends HasList<T>, K extends keyof U>(
-  this: Profile<T, U, K>, _c: KeyedChangeStream<T>, type: KeyedStateMsgType, m?: any
+function _state<T>(
+  this: Profile<T>, _c: KeyedChangeStream<T>, type: KeyedStateMsgType, m?: any
 ) {
   if (type === _Start) {
     const sink = m as Sink<T[] | undefined>;
@@ -172,12 +172,12 @@ function _state<T, U extends HasList<T>, K extends keyof U>(
 }
 
 
-export function makeKeyed<T, U extends HasList<T>, K extends keyof U>(
-  state: State<T[]> | SubState<U, K>,
+export function makeKeyed<T>(
+  state: StateLike<T[]>,
   keyfunc: KeyFunc<T>,
 ): KeyedState<T> {
   const initial = state.get() || [];
-  const profile: Profile<T, U, K> = {
+  const profile: Profile<T> = {
     state,
     sinks: [],
     talkback: undefined,
