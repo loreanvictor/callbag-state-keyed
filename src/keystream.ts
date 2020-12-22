@@ -17,15 +17,15 @@ function _keyDownSinkWrap<T>(
 
     if ((isLeaf(change.trace) && current() !== entry?.item)
       || (!isLeaf(change.trace) && (
-            (!entry && !!current()) ||
-            (entry && entry.index in change.trace.subs)
+        (!entry && !!current()) ||
+        (entry && entry.index in change.trace.subs)
       ))
     ) {
       sink(_Data, {
         value: entry?.item,
         trace: isLeaf(change.trace) || !entry ?
-                undefined :
-                ((change.trace as ChangeTraceNode<T>).subs as any)[entry.index]
+          undefined :
+          ((change.trace as ChangeTraceNode<T>).subs as any)[entry.index]
       });
     }
   } else { sink(t as any, m); }
@@ -55,7 +55,7 @@ export function keyUpstream<T>(
       const change = m as Change<T>;
       const entry = watcher.keymap[key];
       const _ref = ref();
-      _ref[entry.index] = change.value!!;
+      _ref[entry.index] = change.value!;
 
       src(_Data, {
         value: _ref,

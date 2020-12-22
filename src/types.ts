@@ -55,7 +55,7 @@ export function isKeyedState<T>(cb: Source<T[]>): cb is KeyedState<T> {
     && (cb as any).index && typeof (cb as any).index === 'function' && (cb as any).index.length === 1
     && (cb as any).changes && typeof (cb as any).changes === 'function' && (cb as any).changes.length === 1
     && (cb as any).keyfunc && typeof (cb as any).keyfunc === 'function' && (cb as any).keyfunc.length === 1
-    ;
+  ;
 }
 
 export const _Latest = 100;

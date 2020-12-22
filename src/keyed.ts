@@ -54,6 +54,7 @@ function index<T>(this: KeyedState<T>, k: number | string) {
   };
 
   src.get = indexGet;
+
   return src;
 }
 
@@ -123,7 +124,7 @@ function _changes<T>(
               move = listChanges.moves[++i]
             ) {
               const src = move.oldIndex; const dest = move.newIndex;
-              const subtrace = trace(this.value[src], change.value!![dest]);
+              const subtrace = trace(this.value[src], change.value![dest]);
               if (subtrace) {
                 (_tr.subs as any)[dest] = subtrace;
               } else {
