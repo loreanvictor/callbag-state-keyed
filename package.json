@@ -1,6 +1,6 @@
 {
   "name": "callbag-state-keyed",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "keyed callbag states",
   "main": "dist/es5/index.js",
   "module": "dist/es6/index.js",
@@ -58,7 +58,7 @@
     "callbag-of": "^2.0.0",
     "callbag-pipe": "^1.2.0",
     "callbag-share": "^1.2.0",
-    "callbag-subject": "^1.0.2",
+    "callbag-subject": "^2.1.0",
     "callbag-subscribe": "^1.5.1",
     "chai": "^4.2.0",
     "eslint": "^7.16.0",

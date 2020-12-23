@@ -30,12 +30,11 @@ function indexGreeter<T>(
   bag: { last: number | undefined },
   t: MsgType, _m?: any
 ) {
-  if (t === _Start) { sink(_Start, _m); sink(_Data, this.watcher.keymap[k]?.index); }
+  if (t === _Start) { sink(_Start, _m); sink(_Data, bag.last!); }
   else if (t === _Data) {
     const _index = this.watcher.keymap[k]?.index;
     if (_index !== bag.last) {
-      sink(_Data, _index);
-      bag.last = _index;
+      sink(_Data, bag.last = _index);
     }
   }
   else/*istanbul ignore else*/if (t === _End) { sink(_End, _m); }
@@ -44,9 +43,8 @@ function indexGreeter<T>(
 function indexGet(this: any) { return this(_Latest) as number; }
 
 function index<T>(this: KeyedState<T>, k: number | string) {
-  // let last: number | undefined = this.watcher.keymap[k]?.index;
-  const bag = { last: this.watcher.keymap[k]?.index };
   const src = (type: MsgType | typeof _Latest, m?: any) => {
+    const bag = { last: this.watcher.keymap[k]?.index };
     if (type === _Latest) { return bag.last; }
     /*istanbul ignore if*/if (type !== _Start) { return; }
     const sink = m as Sink<number>;

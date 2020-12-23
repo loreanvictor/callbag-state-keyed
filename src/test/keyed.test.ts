@@ -1,10 +1,9 @@
-// tslint:disable: max-file-line-count
-// tslint:disable: no-magic-numbers
-// tslint:disable: no-unused-expression
+/* eslint-disable no-unused-expressions */
+
 
 import { should, expect } from 'chai'; should();
 
-const makeSubject = require('callbag-subject');
+import makeSubject from 'callbag-subject';
 import subscribe from 'callbag-subscribe';
 import pipe from 'callbag-pipe';
 import { state, makeState } from 'callbag-state';
@@ -162,7 +161,7 @@ describe('keyed', () => {
       const s = state([{id: 101, name: 'John'}, {id: 102, name: 'Jill'}]);
       const k = keyed(s, p => p.id);
 
-      pipe(k.key(102).sub('name'), subscribe(n => r.push(n!!)));
+      pipe(k.key(102).sub('name'), subscribe(n => r.push(n!)));
 
       r.length.should.equal(1);
       s.set([s.get()[1], s.get()[0]]);
@@ -228,7 +227,7 @@ describe('keyed', () => {
       const s = state<[number, string][]>([[1, 'A'], [2, 'B'], [3, 'C'], [4, 'D']]);
       const k = keyed(s, n => n[0]);
 
-      pipe(k.key(2).sub(1), subscribe(c => r.push(c!!)));
+      pipe(k.key(2).sub(1), subscribe(c => r.push(c!)));
       k.key(2).set([2, 'X']);
       k.set([[2, 'Z'], [3, 'D']]);
 
@@ -240,7 +239,7 @@ describe('keyed', () => {
       const s = state<[number, string][]>([[1, 'A'], [2, 'B'], [3, 'C'], [4, 'D']]);
       const k = keyed(s, n => n[0]);
 
-      pipe(s.sub(1).sub(1), subscribe(c => r.push(c!!)));
+      pipe(s.sub(1).sub(1), subscribe(c => r.push(c!)));
       k.key(2).sub(1).set('X');
       k.key(2).set([2, 'H']);
 
@@ -252,7 +251,7 @@ describe('keyed', () => {
       const s = state<[number, string][]>([[1, 'A'], [2, 'B'], [3, 'C'], [4, 'D']]);
       const k = keyed(s, n => n[0]);
 
-      pipe(k.key(2).sub(1), subscribe(c => r.push(c!!)));
+      pipe(k.key(2).sub(1), subscribe(c => r.push(c!)));
       s.sub(1).set([2, 'X']);
       s.set([[2, 'X'], [3, 'Y']]);
       s.sub(0).sub(1).set('W');
@@ -266,7 +265,7 @@ describe('keyed', () => {
       const k = keyed(s, n => n[0]);
       const k2 = keyed(s, n => n[0]);
 
-      pipe(k.key(2).sub(1), subscribe(c => r.push(c!!)));
+      pipe(k.key(2).sub(1), subscribe(c => r.push(c!)));
       k2.key(2).set([2, 'X']);
       k2.key(2).sub(1).set('Z');
       k2.set([[2, 'W']]);
@@ -278,9 +277,9 @@ describe('keyed', () => {
       const s = state([{id: 101, name: 'Judy'}, {id: 102, name: 'Jafar'}]);
       const k = keyed(s, p => p.id);
 
-      k.key(102).get()!!.should.eql({id: 102, name: 'Jafar'});
+      k.key(102).get()!.should.eql({id: 102, name: 'Jafar'});
       s.sub(1).sub('name').set('Jafet');
-      k.key(102).get()!!.should.eql({id: 102, name: 'Jafet'});
+      k.key(102).get()!.should.eql({id: 102, name: 'Jafet'});
     });
 
     it('should emit initial value.', done => {
@@ -411,14 +410,29 @@ describe('keyed', () => {
       r.should.eql([1, undefined]);
     });
 
+    it('should properly update multiple sinks.', () => {
+      const r1: any[] = []; const r2: any[] = [];
+      const s = state(['A', 'B', 'C']);
+      const k = keyed(s, x => x);
+      const i = k.index('B');
+      pipe(i, subscribe(v => r1.push(v)));
+      pipe(i, subscribe(v => r2.push(v)));
+
+      s.set(['B', 'A', 'C']);
+      s.set(['C', 'A', 'B']);
+      s.set(['C', 'A']);
+
+      r1.should.eql(r2);
+    });
+
     describe('.get()', () => {
       it('should return the last index tracked.', () => {
         const k = keyed(state(['a', 'b', 'c']), x => x);
         const i = k.index('b');
-        i.get()!!.should.equal(1);
+        i.get()!.should.equal(1);
         pipe(i, subscribe(() => {}));
         k.set(['c', 'a', 'b']);
-        i.get()!!.should.equal(2);
+        i.get()!.should.equal(2);
       });
     });
   });
